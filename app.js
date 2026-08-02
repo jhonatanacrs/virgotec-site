@@ -133,48 +133,78 @@
     if (e.target === modal) closeModal();
   });
 
-  /* ---------- Envio do formulário via WhatsApp ---------- */
-  // Não há backend/servidor: os dados digitados são usados para montar uma
-  // mensagem que abre diretamente no WhatsApp da Virgo, pronta para envio.
-  // Nenhum dado é armazenado ou transmitido a outro lugar.
-  var successLinkEl = document.getElementById("modal-success-whatsapp-link");
+  /* ---------- Envio do formulário por e-mail (Formspree) ---------- */
+  // Não há servidor próprio: usamos o Formspree (serviço gratuito) para
+  // receber o POST do formulário e encaminhar por e-mail automaticamente
+  // para contato@virgotech / jhonatan.assis@live.com — sem precisar de
+  // nenhum clique extra da pessoa que preencheu.
+  //
+  // IMPORTANTE — ativação obrigatória antes de publicar:
+  // 1. Crie uma conta gratuita em https://formspree.io usando o e-mail
+  //    jhonatan.assis@live.com.
+  // 2. Crie um novo formulário ("+ New Form") e copie o endpoint gerado,
+  //    algo como: https://formspree.io/f/abcdwxyz
+  // 3. Substitua o valor de FORMSPREE_ENDPOINT abaixo por esse endpoint.
+  // 4. No primeiro envio real do formulário, o Formspree manda um e-mail
+  //    de confirmação para jhonatan.assis@live.com — é preciso clicar no
+  //    link de confirmação uma única vez para ativar o recebimento.
+  var FORMSPREE_ENDPOINT = "https://formspree.io/f/mqervwdd";
 
-  function buildWhatsAppLink(data) {
-    var lines = [
-      "Olá, Virgo! Vim pelo site e gostaria de falar com um especialista.",
-      "",
-      "Nome: " + data.nome,
-      "Empresa: " + data.empresa,
-      "E-mail: " + data.email,
-      "WhatsApp: " + data.whatsapp,
-      "Desafio: " + data.desafio
-    ];
-    var text = encodeURIComponent(lines.join("\n"));
-    return "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + text;
+  var submitBtn = contactForm.querySelector(".modal-submit");
+  var submitBtnLabel = submitBtn ? submitBtn.innerHTML : "";
+  var formErrorEl = document.getElementById("form-error");
+
+  function setSubmitting(isSubmitting) {
+    if (!submitBtn) return;
+    submitBtn.disabled = isSubmitting;
+    submitBtn.textContent = isSubmitting ? "Enviando..." : submitBtnLabel;
+    if (!isSubmitting) submitBtn.innerHTML = submitBtnLabel;
   }
 
   contactForm.addEventListener("submit", function (e) {
     e.preventDefault();
 
-    var data = {
-      nome: document.getElementById("field-nome").value.trim(),
-      empresa: document.getElementById("field-empresa").value.trim(),
-      email: document.getElementById("field-email").value.trim(),
-      whatsapp: document.getElementById("field-whatsapp").value.trim(),
-      desafio: document.getElementById("field-desafio").value.trim()
-    };
+    if (formErrorEl) formErrorEl.style.display = "none";
 
-    var link = buildWhatsAppLink(data);
+    if (FORMSPREE_ENDPOINT.indexOf("SEU_FORM_ID") !== -1) {
+      if (formErrorEl) {
+        formErrorEl.textContent = "Envio por e-mail ainda não configurado: defina FORMSPREE_ENDPOINT em app.js com o endpoint real do Formspree.";
+        formErrorEl.style.display = "block";
+      }
+      return;
+    }
 
-    // Abre o WhatsApp em uma nova aba com a mensagem pré-preenchida.
-    window.open(link, "_blank", "noopener");
+    setSubmitting(true);
 
-    if (successLinkEl) successLinkEl.setAttribute("href", link);
+    var formData = new FormData(contactForm);
+    formData.append("_subject", "Novo contato pelo site Virgo Tecnologia");
 
-    formView.style.display = "none";
-    successView.style.display = "block";
-    var successHeading = successView.querySelector("h3");
-    if (successHeading) successHeading.focus();
+    fetch(FORMSPREE_ENDPOINT, {
+      method: "POST",
+      body: formData,
+      headers: { Accept: "application/json" }
+    })
+      .then(function (response) {
+        if (response.ok) {
+          formView.style.display = "none";
+          successView.style.display = "block";
+          var successHeading = successView.querySelector("h3");
+          if (successHeading) successHeading.focus();
+        } else {
+          return response.json().then(function (data) {
+            throw new Error((data && data.error) || "Falha ao enviar. Tente novamente.");
+          });
+        }
+      })
+      .catch(function (err) {
+        if (formErrorEl) {
+          formErrorEl.textContent = "Não foi possível enviar agora (" + err.message + "). Tente novamente em instantes.";
+          formErrorEl.style.display = "block";
+        }
+      })
+      .finally(function () {
+        setSubmitting(false);
+      });
   });
 
 })();

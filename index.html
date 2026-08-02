@@ -519,7 +519,8 @@
           <textarea id="field-desafio" name="desafio" placeholder="Conte brevemente sobre o problema, ideia ou processo que deseja evoluir." required></textarea>
         </div>
 
-        <p class="form-disclaimer">Ao enviar, abriremos o WhatsApp da Virgo em uma nova aba com sua mensagem pronta para envio. Nenhum dado é armazenado neste site.</p>
+        <p class="form-disclaimer" id="form-error" style="display:none;color:#ff9b9b;"></p>
+        <p class="form-disclaimer">Ao enviar, você recebe a confirmação na tela e nossa equipe recebe sua mensagem por e-mail automaticamente. Seus dados não são usados para outro fim.</p>
 
         <button type="submit" class="btn btn-primary btn-block modal-submit">
           Enviar solicitação
@@ -532,13 +533,9 @@
       <div class="success-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
       </div>
-      <h3 tabindex="-1">Quase lá!</h3>
-      <p>Abrimos o WhatsApp em uma nova aba com sua mensagem pronta. Se não abriu automaticamente (bloqueio de pop-up), toque no botão abaixo para continuar por lá.</p>
-      <a id="modal-success-whatsapp-link" href="https://wa.me/5521972404437" target="_blank" rel="noopener" class="btn btn-primary" style="margin-top:22px;">
-        Abrir WhatsApp
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-      </a>
-      <button class="btn btn-ghost-dark js-close-modal" style="margin-top:12px;">Fechar</button>
+      <h3 tabindex="-1">Solicitação enviada.</h3>
+      <p>Recebemos seu contato por e-mail. Nossa equipe retorna em até 1 dia útil para agendar uma conversa inicial.</p>
+      <button class="btn btn-ghost-dark js-close-modal" style="margin-top:26px;">Fechar</button>
     </div>
 
   </div>
