@@ -6,6 +6,9 @@
 
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  /* Número de WhatsApp da Virgo Tecnologia (com DDI 55 + DDD, somente dígitos) */
+  var WHATSAPP_NUMBER = "5521972404437";
+
   /* ---------- Ano dinâmico no rodapé ---------- */
   var yearEl = document.getElementById("current-year");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
@@ -130,10 +133,44 @@
     if (e.target === modal) closeModal();
   });
 
-  /* ---------- Envio simulado do formulário ---------- */
+  /* ---------- Envio do formulário via WhatsApp ---------- */
+  // Não há backend/servidor: os dados digitados são usados para montar uma
+  // mensagem que abre diretamente no WhatsApp da Virgo, pronta para envio.
+  // Nenhum dado é armazenado ou transmitido a outro lugar.
+  var successLinkEl = document.getElementById("modal-success-whatsapp-link");
+
+  function buildWhatsAppLink(data) {
+    var lines = [
+      "Olá, Virgo! Vim pelo site e gostaria de falar com um especialista.",
+      "",
+      "Nome: " + data.nome,
+      "Empresa: " + data.empresa,
+      "E-mail: " + data.email,
+      "WhatsApp: " + data.whatsapp,
+      "Desafio: " + data.desafio
+    ];
+    var text = encodeURIComponent(lines.join("\n"));
+    return "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + text;
+  }
+
   contactForm.addEventListener("submit", function (e) {
     e.preventDefault();
-    // Simulação visual apenas — nenhum dado é enviado ou armazenado.
+
+    var data = {
+      nome: document.getElementById("field-nome").value.trim(),
+      empresa: document.getElementById("field-empresa").value.trim(),
+      email: document.getElementById("field-email").value.trim(),
+      whatsapp: document.getElementById("field-whatsapp").value.trim(),
+      desafio: document.getElementById("field-desafio").value.trim()
+    };
+
+    var link = buildWhatsAppLink(data);
+
+    // Abre o WhatsApp em uma nova aba com a mensagem pré-preenchida.
+    window.open(link, "_blank", "noopener");
+
+    if (successLinkEl) successLinkEl.setAttribute("href", link);
+
     formView.style.display = "none";
     successView.style.display = "block";
     var successHeading = successView.querySelector("h3");
